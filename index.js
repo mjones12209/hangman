@@ -67,17 +67,17 @@ const playGame = () => {
     let rounds = totalRounds;
     let won = 0;
     
-    console.log(randomWord);
-
     wordAsArray.forEach(element=>displayArray.push("_"));
 
     displayResults(rightGuesses,wrongGuesses,displayArray,guessesLeft);
     displayHangman(wrongGuesses.length - 1)
 
     while(guesses <= 6){
-        let guess = prompt.question("Please enter a guess.  ",{ limit: /^[A-Za-z]{1}/, limitMessage: "Please enter one letter a-z"}).toLowerCase();
+        let guess = prompt.question("Please enter a guess.  ",{ limit: /^[A-Za-z]/, limitMessage: "Please enter one letter a-z"}).toLowerCase();
+        guess = guess[0];
         while(previousGuesses.indexOf(guess) > -1){
-            guess = prompt.question("You have already guess that please try again!",{ limit: /^[A-Za-z]{1}/, limitMessage: "Please enter one letter a-z"}).toLowerCase();
+            guess = prompt.question(`You have already guess "${guess}" please try again!`,{ limit: /^[A-Za-z]/, limitMessage: "Please enter one letter a-z"}).toLowerCase();
+            guess = guess[0]
         }
         previousGuesses.push(guess);
         let search = wordAsArray.find((element) => element == guess);
@@ -112,11 +112,9 @@ const playGame = () => {
      }
     totalRounds++;  
     console.log(totalRounds)
-    // console.clear()
     displayTotals(rightGuesses,wrongGuesses,displayArray,randomWord,won);
     displayHangman(wrongGuesses.length);
     displayFinalResults(wonRounds,lostRounds,totalRounds);
-    // console.clear();
     setTimeout(playGame(wonRounds,lostRounds,rounds),7000);
 }
 
