@@ -2,6 +2,11 @@
 const json = require('./word-bank.json');
 const prompt = require('readline-sync')
 
+//Global variables
+let totalRounds=1;
+let wonRounds=0;
+let lostRounds=0;
+let previousGuesses = [];
 
 //Functions
 const wordSelector = (json) => {
@@ -45,11 +50,13 @@ const displayHangman = (wrongGuesses)=> {
 }
 
 const displayFinalResults = (wonRounds,lostRounds,totalRounds) => {
-    console.clear();
+    // console.clear();
     console.log(`You won ${wonRounds} out of ${totalRounds} and lost ${lostRounds} of ${totalRounds}`)
 }
 
-const playGame = (wonRounds=0,lostRounds=0,totalRounds=1) => {
+const playGame = () => {
+    console.clear()
+    console.log(`***Round ${totalRounds}***`)
     const randomWord = wordSelector(json);
     let guesses = 0;
     let guessesLeft = 6;
@@ -69,6 +76,10 @@ const playGame = (wonRounds=0,lostRounds=0,totalRounds=1) => {
 
     while(guesses <= 6){
         let guess = prompt.question("Please enter a guess.  ",{ limit: /^[A-Za-z]{1}/, limitMessage: "Please enter one letter a-z"}).toLowerCase();
+        while(previousGuesses.indexOf(guess) > -1){
+            guess = prompt.question("You have already guess that please try again!",{ limit: /^[A-Za-z]{1}/, limitMessage: "Please enter one letter a-z"}).toLowerCase();
+        }
+        previousGuesses.push(guess);
         let search = wordAsArray.find((element) => element == guess);
         console.clear();
         
@@ -101,25 +112,13 @@ const playGame = (wonRounds=0,lostRounds=0,totalRounds=1) => {
      }
     totalRounds++;  
     console.log(totalRounds)
-    console.clear()
+    // console.clear()
     displayTotals(rightGuesses,wrongGuesses,displayArray,randomWord,won);
     displayHangman(wrongGuesses.length);
-
-    const shouldRestart = restart()
-
-    if(shouldRestart == "y") {
-        console.clear();
-        playGame(wonRounds,lostRounds,rounds);
-    } else if (shouldRestart == "n"){
-        displayFinalResults(wonRounds,lostRounds,totalRounds);
-        console.log("Goodbye");
-    }
+    displayFinalResults(wonRounds,lostRounds,totalRounds);
+    // console.clear();
+    setTimeout(playGame(wonRounds,lostRounds,rounds),7000);
 }
-
-const restart = () => {
-    return prompt.question("Would you like to play again y or n?  ",{ limit: /^[YyNn]$/, limitMessage: "Please enter only letters y or n"})
-}
-
 
 //Main program
 
@@ -128,6 +127,8 @@ const name = prompt.question("May I have your name ?  ")
 console.log(`Welcome to Hangman, ${name}`);
 
 playGame();
+
+
 
 
 
