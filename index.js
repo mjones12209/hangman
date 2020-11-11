@@ -3,27 +3,20 @@ const json = require('./word-bank.json');
 const prompt = require('readline-sync')
 
 //Global variables
-let totalRounds=1;
+let totalRounds=0;
 let wonRounds=0;
 let lostRounds=0;
 let previousGuesses = [];
 
 //Functions
+
 const wordSelector = (json) => {
    return json[Math.floor(Math.random() * json.length)];
 }
 
-const displayResults = (rightGuesses,wrongGuesses,displayArray,guessesLeft) => {
-    console.log("Right Guesses: ",rightGuesses,'\n',"Wrong Guesses: ", wrongGuesses,'\n', displayArray);
-    console.log(`Guesses Remaining:  ${guessesLeft}`)
-}
-const displayTotals = (rightGuesses,wrongGuesses,displayArray,randomWord,won) => {
-    if(won === 0){
-        console.log("You lost this round!");
-    } else if (won === 1){
-        console.log("You won this round!");
-    }
-    console.log("****Round Totals****",'\n',"Right Guesses: ",rightGuesses,'\n',"Wrong Guesses: ", wrongGuesses,'\n',"The answer was:  ", randomWord);
+const displayResults = (displayArray,rightGuesses,wrongGuesses,guessesLeft) => {
+    console.log(displayArray,'\n',"Right Guesses: ",rightGuesses,'\n',"Wrong Guesses: ", wrongGuesses);
+    console.log(`Guesses Remaining:  ${guessesLeft}`);
 }
 
 const displayHangman = (wrongGuesses)=> {
@@ -49,14 +42,24 @@ const displayHangman = (wrongGuesses)=> {
     }
 }
 
+const displayTotals = (rightGuesses,wrongGuesses,randomWord,won) => {
+    if(won === 0){
+        console.log("You lost this round!");
+    } else if (won === 1){
+        console.log("You won this round!");
+    }
+    console.log("****Round Totals****",'\n',"Right Guesses: ",rightGuesses,'\n',"Wrong Guesses: ", wrongGuesses,'\n',"The answer was:  ", randomWord);
+}
+
+
+
 const displayFinalResults = (wonRounds,lostRounds,totalRounds) => {
-    // console.clear();
     console.log(`You won ${wonRounds} out of ${totalRounds} and lost ${lostRounds} of ${totalRounds}`)
 }
 
 const playGame = () => {
-    console.clear()
-    console.log(`***Round ${totalRounds}***`)
+    console.clear();
+    console.log(`***Round ${totalRounds+1}***`)
     const randomWord = wordSelector(json);
     let guesses = 0;
     let guessesLeft = 6;
@@ -64,13 +67,13 @@ const playGame = () => {
     let rightGuesses = [];
     let wrongGuesses= [];
     let displayArray = [];
-    let rounds = totalRounds;
     let won = 0;
     
     wordAsArray.forEach(element=>displayArray.push("_"));
 
-    displayResults(rightGuesses,wrongGuesses,displayArray,guessesLeft);
     displayHangman(wrongGuesses.length - 1)
+    displayResults(displayArray,rightGuesses,wrongGuesses,guessesLeft);
+    
 
     while(guesses <= 6){
         let guess = prompt.question("Please enter a guess.  ",{ limit: /^[A-Za-z]/, limitMessage: "Please enter one letter a-z"}).toLowerCase();
@@ -93,36 +96,36 @@ const playGame = () => {
              });      
         } else if (search !== guess){
             wrongGuesses.push(guess);
+            guessesLeft--;
+            guesses++; 
         }      
         
         if(displayArray.join('') === randomWord){
-            console.log("You won!!!");
             wonRounds++;
             won=1;
             break;
         } else if (wrongGuesses.length === 6){
-            console.log("You lost!!!");
             lostRounds++;
             break;
-        }
-        guesses++;
-        guessesLeft--;
-        displayResults(rightGuesses,wrongGuesses,displayArray,guessesLeft);
-        displayHangman(wrongGuesses.length)    
+        }       
+        displayHangman(wrongGuesses.length);    
+        displayResults(displayArray,rightGuesses,wrongGuesses,guessesLeft);
+        
      }
     totalRounds++;  
-    console.log(totalRounds)
-    displayTotals(rightGuesses,wrongGuesses,displayArray,randomWord,won);
+    displayTotals(rightGuesses,wrongGuesses,randomWord,won);
     displayHangman(wrongGuesses.length);
     displayFinalResults(wonRounds,lostRounds,totalRounds);
-    setTimeout(playGame(wonRounds,lostRounds,rounds),7000);
+    while(true){    
+        const nextRound = prompt.question("Enter 'c' to being next round.",{ limit: /^[cC]/, limitMessage: "Please enter c to continue to next round."});
+        if(nextRound === 'c'){
+            break;
+        }
+    }
+    playGame();
 }
 
 //Main program
-
-const name = prompt.question("May I have your name ?  ")
-
-console.log(`Welcome to Hangman, ${name}`);
 
 playGame();
 
